@@ -1,25 +1,26 @@
-﻿using EO.Internal;
 using System;
 
 namespace SpaceGame
 {
     class Program
-    { 
+    {
 
         static void Main(string[] args)
         {
 
+
             //setting up game
             Random rand = new Random();
-            int coin = 0;
+            int score = 0;
+            int coinPos = 0;
 
 
-            int size = 11;
-            string[,] game = new string[size, size+1];
+            int size = 11; // size based on difficulty
+            string[,] game = new string[size, size];
 
-            for (int i = 1; i < game.GetLength(0); i++)     //filling in array
+            for (int i = 1; i < game.GetLength(0); i++) // width    //filling in array
             {
-                for (int j = 1; j < game.GetLength(1); j++)
+                for (int j = 1; j < game.GetLength(1); j++) // height
                 {
                     game[i, j] = " ";
                 }
@@ -29,10 +30,10 @@ namespace SpaceGame
             {
                 game[i, 0] = "|";
             }
-            
+
             for (int i = 0; i < size; i++)      //right border
             {
-                game[i, size-1] = "|";
+                game[i, size - 1] = "|";
             }
 
             for (int j = 0; j < size; j++)      //top border
@@ -44,11 +45,11 @@ namespace SpaceGame
             int oldPosition = playerPos;
             game[size - 1, playerPos] = "V";    //player starting position
 
-            int counter = 0;
+            int gameCounter = 0;
 
             int playerPosX = size - 1;
-            
-            while (counter <= 100)       //game loop
+
+            while (gameCounter <= 100)       //game loop
             {
 
 
@@ -61,50 +62,66 @@ namespace SpaceGame
 
                 }
 
-                coin = rand.Next(1, size - 2);
-                game[1, coin] = "o";            //creates new coin
+                coinPos = rand.Next(1, size - 2);
+                game[1, coinPos] = "o";            //creates new coin
 
-                Print2DArray(game);
+                Print2DArray(game, score);
 
 
 
-                string buttonPress = Console.ReadLine();
 
-                switch (buttonPress)
+                ConsoleKeyInfo awd = new ConsoleKeyInfo();
+                awd = Console.ReadKey();
+
+                switch (awd.Key)
                 {
-                    case "a": //left
+                    case ConsoleKey.A: //left
                         playerPos -= 1;
                         oldPosition = playerPos + 1;
                         game[playerPosX, oldPosition] = " ";
                         game[playerPosX, playerPos] = "V";
-                        copyRows(size, game); 
+                        if (game[playerPosX - 1, playerPos] == "o")
+                        {
+                            score++;
+                        }
+                        copyRows(size, game);
                         Console.Clear();
                         break;
-                    case "d": //right
+                    case ConsoleKey.D: //right
                         playerPos += 1;
                         oldPosition = playerPos - 1;
                         game[playerPosX, oldPosition] = " ";
                         game[playerPosX, playerPos] = "V";
+                        if (game[playerPosX - 1, playerPos] == "o")
+                        {
+                            score++;
+                        }
                         copyRows(size, game);
                         Console.Clear();
                         break;
-                    case "w": //stay in place
+                    case ConsoleKey.W: //stay in place
+                        if (game[playerPosX - 1, playerPos] == "o")
+                        {
+                            score++;
+                        }
                         copyRows(size, game);
                         Console.Clear();
                         break;
 
                 }
 
-                
-                counter++;
 
+
+                gameCounter++;
+                //Console.WriteLine($"\n{score}");
             }
-            
+
             Console.ReadLine();
         }
 
-        public static void Print2DArray<T>(T[,] matrix)
+        public static void Print2DArray<T>(T[,] matrix, int score)
         {
+            Console.WriteLine($"Score: {score}");
             for (int i = 0; i < matrix.GetLength(0); i++)
             {
                 for (int j = 0; j < matrix.GetLength(1); j++)
@@ -115,11 +132,8 @@ namespace SpaceGame
             }
         }
 
-        static void copyRows(int size, string [,] game)     //moves coins from top to bottom
+        static void copyRows(int size, string[,] game)     //moves coins from top to bottom
         {
-
-            
-
             for (int x = 2; x < size; x++)
             {
                 int rowAbove = x + 1;
@@ -131,16 +145,9 @@ namespace SpaceGame
                         break;
                     }
                     game[size - x, j] = game[size - rowAbove, j];   //copies top row to bottom row
-                    
+
                 }
             }
-
-
-            
-
         }
-
-      
-
     }
 }
